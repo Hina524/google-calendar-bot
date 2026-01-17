@@ -24,7 +24,7 @@ class DiscordNotificationService
         ?string $endTime = null
     ): bool {
         $embed = [
-            'title' => 'カレンダーに予定が追加されました',
+            'title' => 'カレンダーに予定が追加されたよ😘',
             'color' => 0x4285F4, // Blue in Google Calendar
             'fields' => [
                 [
