@@ -8,6 +8,7 @@ use App\Models\WatchChannel;
 use Google\Client;
 use Google\Service\Calendar;
 use Google\Service\Calendar\Channel;
+use Google\Service\Oauth2;
 use Illuminate\Support\Str;
 
 class GoogleCalendarService
@@ -21,12 +22,14 @@ class GoogleCalendarService
         $this->client->setClientSecret(config('google.client_secret'));
         $this->client->setRedirectUri(config('google.redirect_uri'));
         $this->client->addScope(Calendar::CALENDAR_READONLY);
+        $this->client->addScope(Oauth2::USERINFO_EMAIL);
+        $this->client->addScope(Oauth2::USERINFO_PROFILE);
         $this->client->setAccessType('offline');
         $this->client->setPrompt('consent');
     }
 
     /**
-     * OAuth認証URLを取得
+     * Get OAuth authorization URL
      */
     public function getAuthUrl(): string
     {
@@ -34,7 +37,7 @@ class GoogleCalendarService
     }
 
     /**
-     * OAuthコールバックを処理してトークンを取得
+     * Handle OAuth callback and get access token
      */
     public function handleCallback(string $code): array
     {
@@ -42,7 +45,7 @@ class GoogleCalendarService
     }
 
     /**
-     * ユーザーのトークンをクライアントに設定
+     * Set user's access token to the client
      */
     public function setAccessToken(GoogleToken $token): void
     {
@@ -58,7 +61,7 @@ class GoogleCalendarService
     }
 
     /**
-     * トークンを更新
+     * Refresh access token
      */
     public function refreshToken(GoogleToken $token): void
     {
@@ -73,7 +76,7 @@ class GoogleCalendarService
     }
 
     /**
-     * Watch Channelを作成（Push通知を受け取るため）
+     * Create Watch Channel to receive push notifications
      */
     public function createWatchChannel(CalendarUser $user): WatchChannel
     {
@@ -101,7 +104,7 @@ class GoogleCalendarService
     }
 
     /**
-     * Watch Channelを停止
+     * Stop Watch Channel
      */
     public function stopWatchChannel(WatchChannel $watchChannel): void
     {
@@ -119,7 +122,7 @@ class GoogleCalendarService
     }
 
     /**
-     * 最新のイベントを取得
+     * Get recent events from calendar
      */
     public function getRecentEvents(CalendarUser $user, ?string $syncToken = null): array
     {
@@ -149,7 +152,7 @@ class GoogleCalendarService
     }
 
     /**
-     * Google Clientを取得（外部から使う場合）
+     * Get Google Client instance
      */
     public function getClient(): Client
     {
