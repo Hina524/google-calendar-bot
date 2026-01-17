@@ -49,15 +49,14 @@ class GoogleCalendarService
      */
     public function setAccessToken(GoogleToken $token): void
     {
+        if ($token->expires_at->isPast() && $token->refresh_token) {
+            $this->refreshToken($token);
+        }
+
         $this->client->setAccessToken([
             'access_token' => $token->access_token,
             'refresh_token' => $token->refresh_token,
-            'expires_in' => $token->expires_at->diffInSeconds(now()),
         ]);
-
-        if ($this->client->isAccessTokenExpired()) {
-            $this->refreshToken($token);
-        }
     }
 
     /**
@@ -66,6 +65,10 @@ class GoogleCalendarService
     public function refreshToken(GoogleToken $token): void
     {
         $newToken = $this->client->fetchAccessTokenWithRefreshToken($token->refresh_token);
+
+        if (isset($newToken['error'])) {
+            throw new \Exception('Token refresh failed: ' . ($newToken['error_description'] ?? $newToken['error']));
+        }
 
         $token->update([
             'access_token' => $newToken['access_token'],
