@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessCalendarChange;
 use App\Models\WatchChannel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -20,7 +21,7 @@ class CalendarWebhookController extends Controller
             'resource_state' => $resourceState,
         ]);
 
-        // Token検証（不正なリクエストを拒否）
+        // Validate token (reject unauthorized requests)
         if ($token !== config('google.webhook_token')) {
             Log::warning('Invalid webhook token', ['channel_id' => $channelId]);
             return response('Forbidden', 403);
@@ -36,6 +37,9 @@ class CalendarWebhookController extends Controller
             Log::warning('Unknown channel ID', ['channel_id' => $channelId]);
             return response('OK', 200);
         }
+
+        // Dispatch job to process calendar changes
+        ProcessCalendarChange::dispatch($channelId);
 
         return response('OK', 200);
     }
