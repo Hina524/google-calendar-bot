@@ -22,3 +22,17 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# AI
+/.claude
+/.gemini
+CLAUDE.md
+GEMINI.md
+.mcp.json
+boost.json
+
+# Nix
+/.direnv
+/result
+*.drv
+.nix-*
