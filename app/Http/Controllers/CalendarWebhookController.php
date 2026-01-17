@@ -13,11 +13,18 @@ class CalendarWebhookController extends Controller
     {
         $channelId = $request->header('X-Goog-Channel-ID');
         $resourceState = $request->header('X-Goog-Resource-State');
+        $token = $request->header('X-Goog-Channel-Token');
 
         Log::info('Calendar webhook received', [
             'channel_id' => $channelId,
             'resource_state' => $resourceState,
         ]);
+
+        // Token検証（不正なリクエストを拒否）
+        if ($token !== config('google.webhook_token')) {
+            Log::warning('Invalid webhook token', ['channel_id' => $channelId]);
+            return response('Forbidden', 403);
+        }
 
         if ($resourceState === 'sync') {
             return response('OK', 200);

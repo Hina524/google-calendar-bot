@@ -85,6 +85,7 @@ class GoogleCalendarService
         $channel->setId(Str::uuid()->toString());
         $channel->setType('web_hook');
         $channel->setAddress(config('app.url') . '/api/webhook/calendar');
+        $channel->setToken(config('google.webhook_token'));
         $channel->setExpiration((now()->addDays(7)->timestamp * 1000));
 
         $response = $calendarService->events->watch($user->calendar_id, $channel);
