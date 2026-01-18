@@ -35,6 +35,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Create storage directories and set permissions
 RUN mkdir -p /var/www/html/storage/framework/{cache,sessions,views} \
@@ -48,4 +50,4 @@ RUN mkdir -p /var/www/html/database && touch /var/www/html/database/database.sql
 
 EXPOSE 80
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/usr/local/bin/entrypoint.sh"]
