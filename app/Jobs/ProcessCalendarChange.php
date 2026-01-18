@@ -51,28 +51,54 @@ class ProcessCalendarChange implements ShouldQueue
                 continue;
             }
 
-            // Check if event already exists (prevent duplicate notifications)
-            $exists = CalendarEvent::where('calendar_user_id', $user->id)
-                ->where('google_event_id', $event->id)
-                ->exists();
-
-            if ($exists) {
-                continue;
-            }
-
             // Parse event time
             $startTime = $event->start->dateTime ?? $event->start->date;
             $endTime = $event->end->dateTime ?? $event->end->date;
+            $summary = $event->summary ?? '(No title)';
 
             // Format time for display
             $formattedStart = $this->formatEventTime($startTime);
             $formattedEnd = $this->formatEventTime($endTime);
 
-            // Save event to database
+            // Check if event already exists
+            $existingEvent = CalendarEvent::where('calendar_user_id', $user->id)
+                ->where('google_event_id', $event->id)
+                ->first();
+
+            if ($existingEvent) {
+                // Check if event was updated
+                if ($existingEvent->summary !== $summary ||
+                    $existingEvent->start_time !== $startTime ||
+                    $existingEvent->end_time !== $endTime) {
+
+                    // Update event in database
+                    $existingEvent->update([
+                        'summary' => $summary,
+                        'start_time' => $startTime,
+                        'end_time' => $endTime,
+                    ]);
+
+                    // Send update notification
+                    $discordService->sendEventUpdateNotification(
+                        $user->name,
+                        $summary,
+                        $formattedStart,
+                        $formattedEnd
+                    );
+
+                    Log::info('Event update notification sent', [
+                        'user' => $user->name,
+                        'event' => $summary,
+                    ]);
+                }
+                continue;
+            }
+
+            // Save new event to database
             CalendarEvent::create([
                 'calendar_user_id' => $user->id,
                 'google_event_id' => $event->id,
-                'summary' => $event->summary ?? '(No title)',
+                'summary' => $summary,
                 'start_time' => $startTime,
                 'end_time' => $endTime,
             ]);
@@ -80,14 +106,14 @@ class ProcessCalendarChange implements ShouldQueue
             // Send Discord notification
             $discordService->sendEventNotification(
                 $user->name,
-                $event->summary ?? '(No title)',
+                $summary,
                 $formattedStart,
                 $formattedEnd
             );
 
             Log::info('Event notification sent', [
                 'user' => $user->name,
-                'event' => $event->summary,
+                'event' => $summary,
             ]);
         }
     }

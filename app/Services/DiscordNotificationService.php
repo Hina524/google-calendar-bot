@@ -28,10 +28,50 @@ class DiscordNotificationService
 
         $embed = [
             'title' => 'カレンダーに予定が追加されたよ😘',
+            'description' => "\u{200b}",
             'color' => $color,
             'fields' => [
                 [
                     'name' => '👤 追加者',
+                    'value' => $userName . "\n\u{200b}",
+                    'inline' => false,
+                ],
+                [
+                    'name' => '📝 予定',
+                    'value' => $eventSummary . "\n\u{200b}",
+                    'inline' => false,
+                ],
+                [
+                    'name' => '🕐 日時',
+                    'value' => $timeText,
+                    'inline' => false,
+                ],
+            ],
+            'timestamp' => now()->toIso8601String(),
+        ];
+
+        return $this->send(['embeds' => [$embed]]);
+    }
+
+    /**
+     * Send calendar event update notifications
+     */
+    public function sendEventUpdateNotification(
+        string $userName,
+        string $eventSummary,
+        string $startTime,
+        ?string $endTime = null
+    ): bool {
+        $timeText = $endTime ? "{$startTime} 〜 {$endTime}" : $startTime;
+        $color = $userName === '小西姫奈' ? 0x77DD77 : 0x4285F4;
+
+        $embed = [
+            'title' => 'カレンダーの予定が変更されたよ🫶',
+            'description' => "\u{200b}",
+            'color' => $color,
+            'fields' => [
+                [
+                    'name' => '👤 変更者',
                     'value' => $userName . "\n\u{200b}",
                     'inline' => false,
                 ],
