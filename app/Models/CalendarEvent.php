@@ -15,10 +15,6 @@ class CalendarEvent extends Model
         'end_time',
     ];
 
-    protected $casts = [
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
-    ];
 
     public function calendarUser(): BelongsTo
     {

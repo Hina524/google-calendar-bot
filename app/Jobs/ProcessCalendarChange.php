@@ -90,31 +90,6 @@ class ProcessCalendarChange implements ShouldQueue
                 ->first();
 
             if ($existingEvent) {
-                // Check if event was updated
-                if ($existingEvent->summary !== $summary ||
-                    $existingEvent->start_time !== $startTime ||
-                    $existingEvent->end_time !== $endTime) {
-
-                    // Update event in database
-                    $existingEvent->update([
-                        'summary' => $summary,
-                        'start_time' => $startTime,
-                        'end_time' => $endTime,
-                    ]);
-
-                    // Send update notification
-                    $discordService->sendEventUpdateNotification(
-                        $user->name,
-                        $summary,
-                        $formattedStart,
-                        $formattedEnd
-                    );
-
-                    Log::info('Event update notification sent', [
-                        'user' => $user->name,
-                        'event' => $summary,
-                    ]);
-                }
                 continue;
             }
 
