@@ -19,12 +19,6 @@ in
       description = "Port to expose the service on";
     };
 
-    dataDir = mkOption {
-      type = types.path;
-      default = "/var/lib/calendar-bot";
-      description = "Directory for persistent data";
-    };
-
     environmentFile = mkOption {
       type = types.nullOr types.path;
       default = null;
@@ -35,13 +29,6 @@ in
   config = mkIf cfg.enable {
     # Ensure Docker is enabled
     virtualisation.docker.enable = true;
-
-    # Ensure data directory and database file exist (82:82 = www-data in Alpine)
-    # Directory needs 0755 for SQLite journal files, file needs 0664 for write access
-    systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0755 82 82 -"
-      "f ${cfg.dataDir}/database.sqlite 0664 82 82 -"
-    ];
 
     # Build Docker image during nixos-rebuild
     system.activationScripts.calendar-bot-build = ''
@@ -56,7 +43,7 @@ in
       image = "calendar-bot:latest";
       ports = [ "${toString cfg.port}:80" ];
       volumes = [
-        "${cfg.dataDir}/database.sqlite:/var/www/html/database/database.sqlite"
+        "calendar-bot-database:/var/www/html/database"
         "calendar-bot-storage:/var/www/html/storage"
       ];
       environmentFiles = lib.optional (cfg.environmentFile != null) cfg.environmentFile;
