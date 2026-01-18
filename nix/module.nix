@@ -36,11 +36,11 @@ in
     # Ensure Docker is enabled
     virtualisation.docker.enable = true;
 
-    # Ensure data directory exists
+    # Ensure data directory exists (82:82 = www-data in Alpine)
     systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0755 root root -"
-      "d ${cfg.dataDir}/database 0755 root root -"
-      "d ${cfg.dataDir}/storage 0755 root root -"
+      "d ${cfg.dataDir} 0755 82 82 -"
+      "d ${cfg.dataDir}/database 0755 82 82 -"
+      "d ${cfg.dataDir}/storage 0755 82 82 -"
     ];
 
     # Build Docker image during nixos-rebuild
