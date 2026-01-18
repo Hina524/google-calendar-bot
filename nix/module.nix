@@ -36,10 +36,10 @@ in
     # Ensure Docker is enabled
     virtualisation.docker.enable = true;
 
-    # Ensure data directory exists (82:82 = www-data in Alpine)
+    # Ensure data directory and files exist (82:82 = www-data in Alpine)
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir} 0755 82 82 -"
-      "d ${cfg.dataDir}/database 0755 82 82 -"
+      "f ${cfg.dataDir}/database.sqlite 0644 82 82 -"
       "d ${cfg.dataDir}/storage 0755 82 82 -"
     ];
 
@@ -56,7 +56,7 @@ in
       image = "calendar-bot:latest";
       ports = [ "${toString cfg.port}:80" ];
       volumes = [
-        "${cfg.dataDir}/database:/var/www/html/database"
+        "${cfg.dataDir}/database.sqlite:/var/www/html/database/database.sqlite"
         "${cfg.dataDir}/storage:/var/www/html/storage"
       ];
       environmentFiles = lib.optional (cfg.environmentFile != null) cfg.environmentFile;
