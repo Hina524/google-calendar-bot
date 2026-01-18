@@ -37,9 +37,10 @@ in
     virtualisation.docker.enable = true;
 
     # Ensure data directory and database file exist (82:82 = www-data in Alpine)
+    # Directory needs 0755 for SQLite journal files, file needs 0664 for write access
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir} 0755 82 82 -"
-      "f ${cfg.dataDir}/database.sqlite 0644 82 82 -"
+      "f ${cfg.dataDir}/database.sqlite 0664 82 82 -"
     ];
 
     # Build Docker image during nixos-rebuild
