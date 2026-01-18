@@ -46,8 +46,32 @@ class ProcessCalendarChange implements ShouldQueue
         }
 
         foreach ($result['events'] as $event) {
-            // Skip cancelled events
+            // Handle cancelled (deleted) events
             if ($event->status === 'cancelled') {
+                $existingEvent = CalendarEvent::where('calendar_user_id', $user->id)
+                    ->where('google_event_id', $event->id)
+                    ->first();
+
+                if ($existingEvent) {
+                    $formattedStart = $this->formatEventTime($existingEvent->start_time);
+                    $formattedEnd = $this->formatEventTime($existingEvent->end_time);
+
+                    // Send delete notification
+                    $discordService->sendEventDeleteNotification(
+                        $user->name,
+                        $existingEvent->summary,
+                        $formattedStart,
+                        $formattedEnd
+                    );
+
+                    // Delete from database
+                    $existingEvent->delete();
+
+                    Log::info('Event delete notification sent', [
+                        'user' => $user->name,
+                        'event' => $existingEvent->summary,
+                    ]);
+                }
                 continue;
             }
 

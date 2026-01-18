@@ -93,6 +93,44 @@ class DiscordNotificationService
     }
 
     /**
+     * Send calendar event delete notifications
+     */
+    public function sendEventDeleteNotification(
+        string $userName,
+        string $eventSummary,
+        string $startTime,
+        ?string $endTime = null
+    ): bool {
+        $timeText = $endTime ? "{$startTime} 〜 {$endTime}" : $startTime;
+
+        $embed = [
+            'title' => 'カレンダーの予定が削除されたよ🗑️',
+            'description' => "\u{200b}",
+            'color' => 0xED4245,
+            'fields' => [
+                [
+                    'name' => '👤 削除者',
+                    'value' => $userName . "\n\u{200b}",
+                    'inline' => false,
+                ],
+                [
+                    'name' => '📝 予定',
+                    'value' => $eventSummary . "\n\u{200b}",
+                    'inline' => false,
+                ],
+                [
+                    'name' => '🕐 日時',
+                    'value' => $timeText,
+                    'inline' => false,
+                ],
+            ],
+            'timestamp' => now()->toIso8601String(),
+        ];
+
+        return $this->send(['embeds' => [$embed]]);
+    }
+
+    /**
      * Send a message on Discord
      */
     private function send(array $payload): bool
