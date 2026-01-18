@@ -23,36 +23,31 @@ class DiscordNotificationService
         string $startTime,
         ?string $endTime = null
     ): bool {
+        $timeText = $endTime ? "{$startTime} 〜 {$endTime}" : $startTime;
+        $color = $userName === '小西姫奈' ? 0x77DD77 : 0x4285F4;
+
         $embed = [
             'title' => 'カレンダーに予定が追加されたよ😘',
-            'color' => 0x4285F4, // Blue in Google Calendar
+            'color' => $color,
             'fields' => [
                 [
-                    'name' => '追加者',
-                    'value' => $userName,
-                    'inline' => true,
+                    'name' => '👤 追加者',
+                    'value' => $userName . "\n\u{200b}",
+                    'inline' => false,
                 ],
                 [
-                    'name' => '予定',
-                    'value' => $eventSummary,
-                    'inline' => true,
+                    'name' => '📝 予定',
+                    'value' => $eventSummary . "\n\u{200b}",
+                    'inline' => false,
                 ],
                 [
-                    'name' => '開始時刻',
-                    'value' => $startTime,
-                    'inline' => true,
+                    'name' => '🕐 日時',
+                    'value' => $timeText,
+                    'inline' => false,
                 ],
             ],
             'timestamp' => now()->toIso8601String(),
         ];
-
-        if ($endTime) {
-            $embed['fields'][] = [
-                'name' => '終了時刻',
-                'value' => $endTime,
-                'inline' => true,
-            ];
-        }
 
         return $this->send(['embeds' => [$embed]]);
     }
