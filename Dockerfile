@@ -1,5 +1,7 @@
 FROM php:8.4-fpm-alpine
 
+ENV TZ=Asia/Tokyo
+
 # Install system dependencies
 RUN apk add --no-cache \
     nginx \
@@ -10,6 +12,7 @@ RUN apk add --no-cache \
     libpq-dev \
     oniguruma-dev \
     libxml2-dev \
+    tzdata \
     && docker-php-ext-install \
     pdo \
     pdo_pgsql \
